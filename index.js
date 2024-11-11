@@ -1,10 +1,10 @@
 // index.js
+require('dotenv').config();
 const express = require('express');
 const httpProxy = require('http-proxy');
 const cors = require('cors');
 const helmet = require('helmet');
 const crypto = require('crypto');
-require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -30,7 +30,7 @@ app.get('/health', (req, res) => {
 
 // Generate secure hash for video URLs
 function generateSecureHash(videoUrl) {
-    const secret = process.env.URL_ENCRYPTION_KEY || 'default-dev-key';
+    const secret = process.env.URL_ENCRYPTION_KEY;
     return crypto
         .createHash('sha256')
         .update(videoUrl + secret)
@@ -48,15 +48,16 @@ app.post('/register', express.json(), (req, res) => {
 
     // Verify request is from your player service
     const apiKey = req.headers['x-api-key'];
-    if (process.env.NODE_ENV === 'production' && apiKey !== process.env.INTERNAL_API_KEY) {
+    if (apiKey !== process.env.INTERNAL_API_KEY) {
         return res.status(401).json({ error: 'Unauthorized' });
     }
 
     const hash = generateSecureHash(videoUrl);
     videoCache.set(hash, videoUrl);
     
-    const proxyUrl = `${process.env.PROXY_URL || `http://localhost:${port}`}/stream/${hash}`;
-    return res.json({ proxyUrl });
+    return res.json({
+        proxyUrl: `${process.env.PROXY_URL}/stream/${hash}`
+    });
 });
 
 // Stream endpoint
