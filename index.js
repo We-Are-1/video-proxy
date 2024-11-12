@@ -17,17 +17,11 @@ app.use(helmet({
 
 // Configure CORS to accept requests from multiple domains
 app.use(cors({
-    origin: function(origin, callback) {
-        // Allow requests with no origin (like mobile apps or curl requests)
-        if (!origin) return callback(null, true);
-        
-        const allowedOrigins = (process.env.ALLOWED_ORIGINS || '').split(',');
-        if (allowedOrigins.indexOf(origin) !== -1) {
-            callback(null, true)
-        } else {
-            callback(null, false)
-        }
-    },
+    origin: [
+        'https://player-2-s0j9.onrender.com',
+        'portal.weare1media.com',
+        process.env.PLAYER_URL
+    ],
     credentials: true
 }));
 
